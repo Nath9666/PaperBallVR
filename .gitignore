@@ -1,0 +1,70 @@
+# ==========================================
+# .gitignore – Projet Unreal Engine 5
+# ==========================================
+
+# --- Dossiers générés par le moteur ---
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+Build/
+!Build/**/*.ico
+
+# --- Plugins : on garde le code, pas ce qui est généré ---
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# --- Builds packagés ---
+Packaged/
+Archive/
+*.pak
+*.ucas
+*.utoc
+
+# --- Fichiers de solution et IDE ---
+.vs/
+.vscode/
+.idea/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.xcodeproj
+*.xcworkspace
+
+# --- Fichiers compilés ---
+*.dll
+*.exe
+*.pdb
+*.lib
+*.exp
+*.obj
+*.o
+*.so
+*.dylib
+*.app
+*.ipa
+*.apk
+
+# --- Fichiers temporaires et de debug ---
+*.tmp
+*.log
+*.dmp
+*.bak
+*.orig
+*.swp
+*~
+
+# --- Système d'exploitation ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Cache de shaders et de compilation ---
+*.ddc
+ShaderDebugInfo/
