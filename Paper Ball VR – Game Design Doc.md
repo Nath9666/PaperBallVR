@@ -6,11 +6,11 @@ Oct 1, 2026 · @nathan
 
 Paper Ball VR est la démo Unreal de l'atelier technologies immersives des portes ouvertes du Studio, le 8 octobre 2026 après-midi. Elle doit être jouable sans briefing par des étudiants en informatique, et servir ensuite de pièce de portfolio en entretien.
 
-| Poste | Casque | Activité |
-| --- | --- | --- |
-| Ma démo | Casque PC filaire Steam avec balises | Paper Ball VR (Unreal Engine 5) |
-| Créer | Meta Quest 3 | Dessin 3D en réalité mixte (Open Brush) |
-| Découvrir | Meta Quest 2 | Appli de prise en main, ou second poste de dessin |
+| Poste     | Casque                               | Activité                                          |
+| --------- | ------------------------------------ | ------------------------------------------------- |
+| Ma démo   | Casque PC filaire Steam avec balises | Paper Ball VR (Unreal Engine 5)                   |
+| Créer     | Meta Quest 3                         | Dessin 3D en réalité mixte (Open Brush)           |
+| Découvrir | Meta Quest 2                         | Appli de prise en main, ou second poste de dessin |
 
 Contraintes : sessions de 3 minutes environ, public qui défile, spectateurs qui regardent sur un écran.
 
@@ -36,14 +36,21 @@ Intentions :
 
 Quatre niveaux, une partie d'environ 3 minutes. On passe au niveau suivant dès que le nombre de paniers requis est atteint.
 
-| Niveau | Règle | Ce que le joueur apprend | Pour passer |
-| --- | --- | --- | --- |
-| 0 – Tuto | La corbeille se place toute seule sous la canette | Le geste de lancer, réussite garantie | 2 paniers |
-| 1 – Fixe | La corbeille ne bouge plus | Viser et doser sa force | 3 paniers |
-| 2 – Mobile | La corbeille se déplace, et se fige dès que la canette est lâchée | Choisir le bon moment | 3 paniers |
-| 3 – Ventilos | Des ventilateurs apparaissent et dévient la canette | Compenser le vent | Score max avant la fin du chrono |
+| Niveau       | Règle                                                             | Ce que le joueur apprend              | Pour passer                      |
+| ------------ | ----------------------------------------------------------------- | ------------------------------------- | -------------------------------- |
+| 0 – Tuto     | La corbeille se place toute seule sous la canette                 | Le geste de lancer, réussite garantie | 2 paniers                        |
+| 1 – Fixe     | La corbeille ne bouge plus                                        | Viser et doser sa force               | 3 paniers                        |
+| 2 – Mobile   | La corbeille se déplace, et se fige dès que la canette est lâchée | Choisir le bon moment                 | 3 paniers                        |
+| 3 – Ventilos | Des ventilateurs apparaissent et dévient la canette               | Compenser le vent                     | Score max avant la fin du chrono |
 
 Pistes de bonus si le temps le permet : une corbeille plus petite au niveau 3, un panier « rebond sur le mur » qui rapporte double.
+
+**Option pour le niveau 3 : la poubelle aléatoire.** Si les ventilos ne sont pas faits, le niveau 3 peut reposer sur une poubelle qui choisit un point au hasard dans un rayon, s'y rend, s'arrête une seconde, puis repart. La pause garde le jeu juste : le joueur attend l'arrêt ou tente le coup en mouvement. Le niveau 2 garde le va-et-vient, prévisible et donc gratifiant.
+
+- Toutes les 2 secondes (Set Timer by Event en boucle), choisir une cible : StartLocation + X et Y aléatoires (Random Float in Range entre −MoveRadius et +MoveRadius)
+- Dans le Tick, si le mode est aléatoire et que la poubelle n'est pas figée : VInterp To Constant vers la cible
+- NotifyThrown la fige comme au niveau 2
+- Ajouter une valeur `Random` à E_BinMode
 
 ## Le chrono et la tension
 
@@ -58,18 +65,18 @@ Côté son, un seul son de tic-tac suffit : on joue sur son volume et sa vitesse
 
 ## Architecture Unreal
 
-Un manager central lit la description des niveaux et configure les objets ; la boulette et la corbeille communiquent par événements.
+Un manager central lit la description des niveaux et configure les objets ; la canette et la poubelle communiquent par événements.
 
 &#91;embedded content: architecture Blueprint · 8 éléments\]
 
 Quand la canette est lâchée, `OnThrown` dit à la corbeille de s'aimanter (niveau 0) ou de se figer (niveau 2). Un panier remonte au manager par `OnScored`, qui met à jour le score et passe au niveau suivant.
 
-| Champ de DT\_Levels | Exemple |
-| --- | --- |
-| Mode de la corbeille | Aimantée, Fixe, Mobile |
-| Nombre de ventilos | 0 à 2 |
-| Paniers requis | 2, 3, ou 0 pour « jusqu'à la fin du chrono » |
-| Son du chrono | Silencieux, tic-tac, tic-tac rapide |
+| Champ de DT_Levels   | Exemple                                      |
+| -------------------- | -------------------------------------------- |
+| Mode de la corbeille | Aimantée, Fixe, Mobile                       |
+| Nombre de ventilos   | 0 à 2                                        |
+| Paniers requis       | 2, 3, ou 0 pour « jusqu'à la fin du chrono » |
+| Son du chrono        | Silencieux, tic-tac, tic-tac rapide          |
 
 ## Points techniques sensibles
 
@@ -91,47 +98,55 @@ Quand la canette est lâchée, `OnThrown` dit à la corbeille de s'aimanter (niv
 
 ## Planning
 
-Règle d'or : une version jouable de bout en bout dimanche 4 au soir, même moche. Tout ce qui suit est du bonus.
+Règle d'or : toute la logique de jeu en mode debug **lundi 5 au soir, la VR réglée au Studio mardi 6**, même moche. Jeudi matin, aucune nouvelle fonctionnalité : uniquement de la marge pour corriger un bug.
+
+| Indispensable                                                              | Si le temps le permet                     | Coupé ou simplifié                                                                                        |
+| -------------------------------------------------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Canette en main en VR, lancer, niveaux 0 à 2, chrono, score, fin de partie | Ventilos, tic-tac qui monte, sons soignés | Classement (un score suffit), spline remplacée par une Timeline, DataTable remplacée par un Switch on Int |
 
 **Vendredi 2 octobre – Les fondations**
 
 - [x] Projet UE5 sur le VR Template, OpenXR activé
 - [x] Décor de bureau simple (assets gratuits, licences vérifiées)
-- [x] BP\_DebugPawn clavier-souris : lancer au clic, force selon la durée d'appui
-- [x] BP\_Can : mesh, collision, Physical Material peu rebondissant
-- [x] BP\_Bin : détection du panier, testée avec le pawn de debug
+- [x] BP_DebugPawn clavier-souris : lancer au clic, force selon la durée d'appui
+- [x] BP_Can : mesh, collision, Physical Material peu rebondissant
+- [x] BP_Bin : détection du panier, testée avec le pawn de debug
 - [x] Score affiché en debug à l'écran
 
-**Samedi 3 octobre – Le panier**
+**Samedi 3 et dimanche 4 octobre – Repos**
 
-- [ ] Test sur le PC et le casque filaire du jour J
-- [ ] Canette qui apparaît en main, lancer moyenné qui se sent bien
-- [ ] Niveau 1 (fixe), puis niveau 0 (tuto aimanté)
+**Lundi 5 octobre – Logique de jeu en mode debug, sur ma tour**
 
-**Dimanche 4 octobre – La boucle complète**
+Ma carte graphique (GTX 1050, 2 Go) ne permet pas de développer confortablement en VR : tout ce qui est logique de jeu se fait avec le pawn de debug, sans casque.
 
-- [ ] Niveau 2 (corbeille mobile, figée au lancer)
-- [ ] LevelManager et DataTable des niveaux
-- [ ] Enchaînement des niveaux, début et fin de partie
-- [ ] **Partie jouable de bout en bout**
+- [x] BP_LevelManager : Score, CurrentLevel, fonction AddScore appelée par la poubelle
+- [x] Enchaînement des niveaux : après X paniers, niveau suivant (Switch on Int)
+- [x] Niveau 2 : poubelle mobile avec une Timeline en aller-retour, figée au lancer
+- [ ] Niveau 0 : poubelle aimantée
+- [ ] Chrono de 3 minutes et fin de partie
+- [x] Projet allégé : Lumen, Virtual Shadow Maps et Nanite désactivés, Forward Shading et Instanced Stereo activés
 
-**Lundi 5 octobre – Tension**
+**Mardi 6 octobre – La VR au Studio**
 
-- [ ] Niveau 3 (ventilos)
-- [ ] Horloge murale et montée du tic-tac
+- [ ] Projet ouvert et lancé sur le PC du Studio (même version d'Unreal, SteamVR, performances)
+- [ ] Canette qui apparaît en main sur la gâchette de préhension, lancer avec vélocité moyennée
+- [ ] **Partie jouable de bout en bout en VR**
+- [ ] Sons : apparition, lancer, panier
+- [ ] Écran de fin avec le score
+- [ ] Niveau 3 : ventilos ou poubelle aléatoire, si tout le reste marche
 
-**Mardi 6 octobre – Finition**
+**Mercredi 7 octobre – Sécuriser**
 
-- [ ] Sons : froissement, panier, raté, sonnerie
-- [ ] Écran de fin et classement sur la vue spectateur
-- [ ] Bouton reset pour l'opérateur
-
-**Mercredi 7 octobre – Répétition**
-
-- [ ] Installation sur site, balises calibrées, zone de jeu définie
-- [ ] Tests avec 2 ou 3 vrais joueurs, réglage de la difficulté
-- [ ] Build de secours sur clé USB
+- [ ] Répétition sur site, balises calibrées, zone de jeu définie
+- [ ] Tests avec 2 ou 3 personnes, réglage de la difficulté
+- [ ] Horloge et tic-tac si tu as un moment
+- [ ] Build packagé et copie de secours sur clé USB
 - [ ] Capture vidéo de la démo pour le portfolio et LinkedIn
+
+**Jeudi 8 octobre – Jour J**
+
+- [ ] Matin : marge pour corriger un bug, aucune nouvelle fonctionnalité
+- [ ] Après-midi : l'atelier
 
 ## Jour J : checklist
 
